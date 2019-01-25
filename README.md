@@ -1,34 +1,40 @@
 Goals
 =====
 
-Goal for the attacker:
+Goal for the red team:
 
 * leave a means to come back as root on the machine: remote backdoor
 * leaves as little logs as possible
 
-Goal for the defender:
+Goal for the blue team:
 
 * find out ASAP if a backdoor has been inserted
 
 
 Assumptions:
 
-* attacker is root
-* attacker cannot stop protections already in place
-* attacker cannot produce very advanced exploits (fake FS information, rootkit ...)
+* red team is root
+* red team cannot stop protections already in place
+* red team cannot produce very advanced exploits (fake FS information, rootkit ...)
 
 
 Kernel
 ======
 Module
 ------
-Add a module.
+Red team:
 
-=> Sign kernel modules
-=> Forbid module loading after boot
+* Add a module.
+
+Blue team:
+
+* Sign kernel modules
+* Forbid module loading after boot
 
 Kernel itself
 -------------
+
+Blue team:
 
 => Kernel signing?
 => Investigate unscheduled reboots
@@ -39,101 +45,150 @@ Userspace remote backdoors
 ==========================
 Standalone Process
 ------------------
-Always listening for a remote connection, port knocking
-Can be hidden from ps
-Name can be hidden by overwriting argv[0]
-Can be deleted after launch
-Can be run from shell directly without touching disk
-Replace binary
+Red team:
 
-=> Need to scan /proc, not ps
-=> check if symlink exe matches argv[0]
+* Always listening for a remote connection, port knocking
+* Can be hidden from ps
+* Name can be hidden by overwriting argv[0]
+* Binary can be deleted after launch
+* Can be run from shell directly without touching disk
+* Replace binary
+
+Blue team:
+* Need to scan /proc, not ps
+* check if symlink exe matches argv[0]
 
 
 Standalone Process triggered by external packet
 -----------------------------------------------
-Command run on iptables TRIGGER
-iptable module
+Red team:
 
-=> Audit NF rules
-=> forbid iptables modules
+* Command run on iptables TRIGGER
+* iptable module
+
+Blue team:
+
+* Audit NF rules
+* monitor/forbid iptables modules
 
 
 Standalone process triggered by application crash
 -------------------------------------------------
-Kernel crash handler core_pattern hookup
+Red team:
 
-=> Monitor it?
+* Kernel crash handler core_pattern hookup
+
+Blue team:
+
+* Monitor it?
 
 
 Standalone process triggered by reboot
 --------------------------------------
-Somewhere in an init script
+Red team:
 
-=> Monitor init scripts
+* Somewhere in an init script
+
+Blue team:
+
+* Monitor/sign init scripts
 
 
-Watching logs
--------------
+Standalone process triggered by a log
+-------------------------------------
+
 ``` bash
 tail -F /var/log/syslog | awk '/Failed logging for user fhqsdghflhdsqk/ {system("run_backdoor")}'
 ```
 
-=> Scan /proc
+Blue team:
+
+* Scan /proc
 
 
 Triggered by crontab/at
 -----------------------
-Could be used to evade /proc/ scanning.
 
-=> Need to control user and system jobs.
+Red team:
+
+* Could be used to evade /proc/ scanning.
+
+
+Blue team:
+
+* Need to control user and system jobs.
 
 
 Inject into authorized process/library binary
 ---------------------------------------------
-Add a backdoor to a binary.
-Add a backdoor to a webserver.
 
-=> Need to control binary integrity
-=> Need to control directories
+Red team:
+
+* Add a backdoor to a binary.
+* Add a backdoor to a webserver.
+
+Blue team:
+
+* Need to control binary integrity
+* Need to control directories
 
 
 Inject into process memory
 --------------------------
-Is this even possible? Injecting SSHd?
-Lost at reboot.
-cymothoa?
 
-Impossible to detect?
+Red team:
+
+* inject backdoor into process memory
+* Lost at reboot.
+
+Blue team:
+
+* Impossible to detect?
 
 
 Hijack loader
 -------------
-Add configuration to /etc/ls.so.conf,/etc/ld.so.conf.d
 
-=> Control integrity of configuration
+Red team:
+
+* Add configuration to /etc/ls.so.conf,/etc/ld.so.conf.d
+
+Blue team :
+
+* Control integrity of configuration
 
 
 PAM configuration
 -----------------
-Alter PAM configuration
+Red team:
 
-=> Need to control configuration integrity
+* Alter PAM configuration
+
+Blue team:
+
+*  Need to control configuration integrity
 
 
 SSH configuration
 -----------------
-Add an authorized key
-Default to another PAM
+Red team:
 
-=> Centralize and monitor authorized keys
+* Add an authorized key
+* Default to another PAM
+
+Blue team:
+
+* Centralize and monitor authorized keys
 
 
 User hijacking
 --------------
-Add a user, or change a user's password.
+Red team:
 
-=> Monitor /etc/{passwd,shadow}
+* Add a user, or change a user's password.
+
+Blue team:
+* Monitor /etc/{passwd,shadow}
 
 
 
@@ -142,12 +197,14 @@ Local backdoors
 
 Add root rights to low-privileged user
 --------------------------------------
-/etc/sudoers
-/etc/sudoers.d/
-/etc/passwd
-/etc/groups
+* /etc/sudoers
+* /etc/sudoers.d/
+* /etc/passwd
+* /etc/groups
 
-=> Monitor sudoers
+Blue team:
+
+* Monitor sudoers
 
 
 Setuid/Setgid binary
